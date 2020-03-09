@@ -1,3 +1,5 @@
 .deps.mk
 *.beam
 *.app
+/.deps.rules
+/.test.deps
