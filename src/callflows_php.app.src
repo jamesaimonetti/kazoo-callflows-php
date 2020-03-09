@@ -1,0 +1,7 @@
+{application,callflow,
+ [{applications,[]},
+  {description,"CallflowPHP - writing callflow logic in PHP"},
+  {env,[{is_kazoo_app,true}]},
+  {modules,[]},
+  {registered,[]},
+  {vsn,"5.0.0"}]}.
