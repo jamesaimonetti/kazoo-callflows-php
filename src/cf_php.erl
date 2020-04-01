@@ -32,6 +32,8 @@ handle(Data, Call) ->
     FlowJSON = handle(Data, Call, kz_doc:id(Data)),
     maybe_branch_flow(Call, FlowJSON).
 
+maybe_branch_flow(Call, 'undefined') ->
+    cf_exe:continue(Call);
 maybe_branch_flow(Call, FlowJSON) ->
     case kzd_callflows:validate_flow(
            kzd_callflows:set_flow(kzd_callflows:new(), kz_json:decode(FlowJSON))
@@ -63,5 +65,15 @@ process_script(Data, Call, Script) ->
     ephp:register_var(PHPContext, <<"Call">>, ReqParams),
     ephp:register_var(PHPContext, <<"Data">>, kz_json:to_proplist(ReqData)),
 
-    {'ok', FlowJSON} = ephp:eval(PHPContext, Script),
-    FlowJSON.
+    process_script_result(PHPContext, ephp:eval(PHPContext, Script)).
+
+process_script_result(_PHPContext, {'ok', FlowJSON}) -> FlowJSON;
+process_script_result(PHPContext, Error) ->
+    ?LOG_INFO("error: ~p", [Error]),
+    _ = ephp_error:handle_error(PHPContext, Error),
+    Output = ephp_context:get_output(PHPContext),
+
+    ?LOG_INFO("ctx: ~p", [PHPContext]),
+    ?LOG_INFO("fs: ~p", [ephp_func:get_functions(ephp_context:get_funcs(PHPContext))]),
+    ?LOG_INFO("output: ~p", [Output]),
+    'undefined'.
